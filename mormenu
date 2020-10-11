@@ -14,6 +14,81 @@
 #			caricato da $HOME/.mormenu se non presente il -f
 #                 1.3  Aggiunta gestione per grafica ansi.
 
+
+################################################################################
+### $HOME/.mormenu (Esempio di file di configurazione di mormenu).
+### I commenti per essere validi devono avere i '#' da colonna 1 a 3 come qui 
+###
+###   Schema di conversione
+###       =  &
+###   !+-----+-----+@
+###   ||     |     |
+###    |     |+    |
+###   ^+-----+-----+*
+###    |     |     |
+###    |     |     |
+###   #+-----+-----+$
+###          %
+#
+#)MainMenu
+#Menu Principale
+#!===================================@
+#| M&M Computers (BO)  Rel 1.1       |
+#^===================================+======================================@
+#|  Applicazioni                     |         Sottomenu                    | 
+#^=========================&=========+======================================*
+#|  0 . shell utente       |         |  S. Gestione Spooler                 |
+#|  1 . Gest. copie        | H. Help |  I. Informix                         |
+#|    .                    |         |  U. Utility                          |
+#|    .                    #=========*                                      | 
+#|  Q . Quit                         |                                      | 
+##===================================%======================================$
+#))
+#0 - Lancia una Shell.
+#1 - Lancio menu copie (user copie su - copie).
+#S - Gestione delle code di stampa. Lista delle code, rimozione delle code con
+#	svuotamento automatico buffer emulex. Gestione e amministrazione delle 
+#	stampanti.
+#I - Utility informix. 
+#U - Utility (top, ping, netstat )
+#)))
+#0:sh::::/bin/sh
+#S:sh::::/usr/smc/etc/spooler.sh
+#1:sh::::su - copie
+#I:>::::Informix
+#U:>::::Utility
+#Q:Q::::
+#))))
+#
+#)Utility
+#Menu Utility
+#!===================================@
+#| M&M Computers (BO)                |
+#^===================================+======================================@
+#|  1 . top                          |                                      |
+#|  2 . ping                         |                                      |
+#|  3 . netstat                      |                                      |
+#|  4 . tavole di route              |                                      |
+#|  5 . sysadm                       |                                      |
+#|  P . Menu precedente              |                                      | 
+#|  Q . Quit                         |                                      | 
+##===================================%======================================$
+#))
+#1 - Loadaverrage 
+#2 - ping su host predefinito 
+#4 - stato dell' interfaccia ethernet (netstat -i). 
+#4 - tavole di instradamento tcp/ip   (netstat -r). 
+#5 - sysadm - utility dell' amminitratore (su root -c "sysadm")
+#)))
+#1:sh: : : :/usr/smc/bin/top
+#2:sh+stop:::Host remoto:ping %s
+#3:sh+stop::::netstat -i
+#4:sh+stop::::netstat -r
+#5:sh::::su root -c "sysadm"
+#Q:Q::::
+#))))
+################################################################################
+
 $h = 0;  # Help
 $f = ""; # Menu da caricare 
 
