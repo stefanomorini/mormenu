@@ -5,7 +5,7 @@ MorMenu Versione 1.3 stable
 Ormai dimenticato e oggi riscoperto lo ripropongo con alcune istruzioni per l'uso e la configurazione del file .mormenu .
 
 Il programma era stato ideato anni fa per lanciare programmi di sistema con l'agevolazione di un menu semigrafico ricorsivo.
-Veniva creato uno utente su Unix e nel .profile l'ultimo comando era mormenu dove nella home dell'utente c'era il file di configurazione $HOME/.mormenu .
+Veniva creato uno utente su Unix e nel .profile l'ultimo comando era mormenu dove nella home dell'utente c'era il file di configurazione $HOME/.mormenu che contiene il menu visualizzato, l'help e la parte di comandi.
 
 Programma partendo da una configurazione precisa di simboli crea la semigrafica per i terminali vt100,ansi e xterm (La variabile TERM dev'essere settata per ottenere la semigrafica) per il lancio di programmi di sistema operativo.
 ```
