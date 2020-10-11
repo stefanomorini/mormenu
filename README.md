@@ -7,7 +7,7 @@ Il programma era stato ideato anni fa per lanciare programmi di sistema con l'ag
 Veniva creato uno utente su Unix e nel .profile l'ultimo comando era mormenu dove nella home dell'utente c'era il file di configurazione $HOME/.mormenu .
 
 Programma partendo da una configurazione precisa di simboli crea la semigrafica per i terminali vt100,ansi e xterm (La variabile TERM dev'essere settata per ottenere la semigrafica) per il lancio di programmi di sistema operativo.
-
+```
    Schema di conversione
        =  &
    !+-----+-----+@
@@ -18,7 +18,7 @@ Programma partendo da una configurazione precisa di simboli crea la semigrafica 
     |     |     |
    #+-----+-----+$
           %
-
+```
 
 Il file di menu è strutturato in tre sezioni:
 	- la prima parte con la semigrafica del menu, 
