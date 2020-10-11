@@ -1,4 +1,5 @@
-###Versione 1.3 stable
+Versione 1.3 stable
+===================
 
 
 Ormai dimenticato e oggi riscoperto lo ripropongo con alcune istruzioni per l'uso e la configurazione del file .mormenu .
@@ -18,7 +19,6 @@ Programma partendo da una configurazione precisa di simboli crea la semigrafica 
     |     |     |
    #+-----+-----+$
           %
-```
 
 Il file di menu è strutturato in tre sezioni:
 	- la prima parte con la semigrafica del menu, 
@@ -44,8 +44,8 @@ La parte comandi include è un record di cinque campi delimitati dai due punti:
 				qunado l'utente batte il 2 viene chiamato questo comando.
 				viene richiesto a video di immettere un dato alla domand "Host remoto" es 127.0.0.1
 				viene seguito il comando ping 127.0.0.1 
-
-** Segue l'sempio di menu da collocare in $HOME/.mormenu **
+```
+**Segue l'sempio di menu da collocare in $HOME/.mormenu**
 ```
 ### $HOME/.mormenu (Esempio di file di configurazione di mormenu).
 ### I commenti per essere validi devono avere i '#' da colonna 1 a 3 come qui 
