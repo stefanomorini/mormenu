@@ -1,0 +1,283 @@
+#!/usr/bin/env perl
+#!/usr/smc/bin/perl   
+#!/usr/sbin/perl #SGI 
+#!/usr/local/bin/perl #MIPS
+
+#ident "@(#): menu,v 1.1 Thu Mar 28 15:28:09 ITA 1997"
+# @(#)menu        Revision: 1.3 
+# programma     : menu
+# autore        : Stefano Morini
+# Scopo         : Questo prog. tramite un file di dati e` in grado di gestire
+#			una sorta di menu ricorsivi per il lancio di comandi
+#			di S.O. 
+#Aggiornamenti  : 1.2  messo che il file di default delle maschere viene
+#			caricato da $HOME/.mormenu se non presente il -f
+#                 1.3  Aggiunta gestione per grafica ansi.
+
+$h = 0;  # Help
+$f = ""; # Menu da caricare 
+
+# Process any switches.
+while ($ARGV[0] =~ /^-/) {
+    $_ = shift;
+    /^-(h)/ && (eval "\$$1 = 1", next);
+    ###y/[ \t]//cd;
+    /^-(f)([\w\-,.\/]+)/ && (eval "\$$1 = \$2", next);
+    die "Unrecognized switch: $_\n";
+}
+
+#$lista_menu = 'lista.menu';
+$lista_menu = $f;
+
+if ( $lista_menu eq "" ){
+	$lista_menu = $ENV{HOME} . '/' . ".mormenu"; 
+
+}
+
+
+# Print Help
+if ( $h ){
+        print "Usage: [-h] [-ffilename] \n";
+        print "-h : This help\n";
+        print "-f : Source menu file \n";
+        exit(0);
+}
+
+open(opr,$lista_menu) || die "Errore nell' apertura del file $lista_menu";
+for(<opr>){
+	next if /^###/;	
+	push(@struttura,$_);
+}
+close opr;
+
+&init_term($ENV{'TERM'});
+
+&main('MainMenu');
+
+sub main{
+	local($namemenu) = @_;
+
+ 	local($indata);
+	local(@screen);
+	local(@help);
+	local(@command);
+
+
+	local($ask_char);
+	#local( $garbate , $cmd , $sistema );
+	local( $azione , $cmd , $ris1, $ris2, $ask_cmd, $sistema );
+	local( $subcom );
+
+	local($ask_char2);
+
+	# Carica i vettori
+
+	### $#command=0;	
+	carica:
+        for (@struttura){
+
+		 if ( m/^\)$namemenu/ && $indata == 0 ) { $indata=1;next; } 
+                 if ( m/^\)\)$/       && $indata == 1 ) { $indata=2;next; } 
+                 if ( m/^\)\)\)$/     && $indata == 2 ) { $indata=3;next; }
+                 if ( m/^\)\)\)\)$/   && $indata == 3 ) { $indata=4;next; } 
+
+		 push(@screen,$_)  if $indata == 1;
+		 push(@help,$_)    if $indata == 2;
+		 push(@command,$_) if $indata == 3;
+		 last carica       if $indata == 4; 
+	}
+
+	# Visualizza il vettore video
+    $ask_char = "";
+    while(1){
+        &set_title($namemenu);
+	&video(@screen);
+
+	print $H,"Seleziona:",$L,"  ";
+	$ask_char = <STDIN>;
+        #&set_title($namemenu,$ask_char);
+	next if  $ask_char =~ /^\n/; 
+	chop($ask_char);
+	$ask_char =~ y/[a-z]/[A-Z]/;
+
+	# Serie di comandi sottintesi 
+	# H = HELP; Q = Quit; P = Menu precedente 	
+	if ( $ask_char eq 'H' ){
+		print @help;
+		&stop();
+		next;
+	}
+	elsif ( $ask_char eq 'Q' ){ exit(0); }
+	elsif ( $ask_char eq 'P' ){ return($namemenu);
+
+	}
+
+	for(@command){
+	    next unless /^$ask_char/;
+
+	  ( $azione , $cmd , $ris1, $ris2, $ask_cmd, $sistema ) = split(/:/,$_);
+
+	    foreach $subcmd ( split(/\+/,$cmd) ){	
+		if ( $ask_cmd ne ''  ) { 
+			for(split(/\+/,$ask_cmd)){
+				print "$_: ";
+				$ask_char2 = <STDIN>;
+				chop($ask_char2);
+			        $sistema =~ s/\%s/$ask_char2/;
+			}
+			$ask_cmd='';
+		}
+		if ( $subcmd eq 'sh' )  { &set_title("$namemenu-$azione");
+					     system($sistema);
+                                        }
+		elsif ( $subcmd eq 'stop' ){ &stop(); }
+		elsif ( $subcmd eq 'rs' )  { &reset_term(); }
+		elsif ( $subcmd eq '>' )   {chop($sistema);&main($sistema);}
+		elsif ( $subcmd eq '<' )   { return($namemenu); }
+		elsif ( $subcmd eq 'Q' )   { exit(0); }
+	   } # end subcom
+	} # end for @command
+
+  } # end while
+	
+} #end main
+
+sub video{
+	local(@scr) = @_;
+	local($str);
+
+	# Pulizia video
+	print "$CLS";
+	# Centratura e vis. titolo
+	$str=' ' x (($NCOL-length($scr[0]))/2);
+	print "$str$R$scr[0]$L";
+	shift(@scr);      # Tolgo il titolo dal vettore
+
+	&graph(@scr);
+
+} #end video
+
+sub stop{
+	print "\n$R>>Premi return per Continuare<<$L";
+	$fermo = <STDIN>;
+}
+
+#  Semigrafica VT100    Semigrafica ANSI    Schema di conversione
+#     q  w                  D  B               =  & 
+# l+-----+-----+k       Z+-----+-----+?    !+-----+-----+@
+# x|     |     |        3|     |     |     ||     |     |
+#  |     |n    |         |     |E    |      |     |+    |
+# t+-----+-----+u       C+-----+-----+4    ^+-----+-----+*
+#  |     |     |         |     |     |      |     |     |
+#  |     |     |         |     |     |      |     |     |
+# m+-----+-----+j       @+-----+-----+Y    #+-----+-----+$
+#        v                     A                  % 
+
+sub graph{
+	local(@linee) = @_;
+			# VT100
+			#$GS='';            #graphics start
+			#$GE='';            #graphics end
+			#$GM=qxlkmjvtwun;   #graphics match
+			#$GMSPECIAL='_|!@#$%^&*+';  #Sim.speciali di conversione
+
+	for(@linee){
+		# Apertura e chiusura semigrafica generallizazzione
+		# Barra verticale sempre sola
+		s/\|/<\|>/g;
+		# Simboli di apertura
+		s/([!^#])/<$1/g;
+		# Simboli di chiusura
+		s/([@*\$])/$1>/g;
+
+	    if( $TERM eq vt100 ){
+		s/<//g;
+		s/>//g;
+		#y/$GMSPECIAL/$GM/;
+		y/=|!@#$%^&*+/qxlkmjvtwun/;
+	    }
+	    elsif( $TERM eq ansi ){
+		s/</[12m/g;
+		s/>/[10m/g;
+		y/=|!@#$%^&*+/D3Z?@YACB4E/;
+	    }
+	    elsif( $TERM eq dumb ){
+		s/<//g;
+		s/>//g;
+		y/=|!@#$%^&*+/-|+++++++++/;
+	    }
+	    #print ' ' x (($NCOL-length($_))/2);
+	    print $_;
+	}
+	
+	
+} #end graph
+
+sub init_term{
+	local($term) = @_;
+
+	# Se il TERM non e` settato lo richiedo
+	if ( $term eq '' ){
+		print "Che tipo di terminale hai (xterm): ";
+		$term = <STDIN>;
+		chop($term);
+		$term = "xterm" if $term eq ''; 
+		$ENV{TERM}=$term;
+	}
+
+	local(@vt100) = ( vt100,vt220,vt320,xterm,x1,ncd,ti928,ti924 );
+
+	for(@vt100){
+		if ( $term eq $_ ){
+			# Carico le GR in GR1
+			print ')0';	
+			$TERM=vt100;       #Usata in graph come switch
+			##$R='[0;7m';      #reverse
+			$R='[7m';      #reverse
+			$L='[0;22m';     #low
+			##$L='[22m';     #low
+			$H='[1m';      #hight
+			$CLS='[H[2J';  #clear screen
+			$BEL='';
+			$NCOL=80;          #Numero di colonne
+			return;
+		}
+	}
+
+	local(@ansi) = ( ansi,ansic,AT386,at386,AT386-ISO,at386-iso );
+
+	for(@ansi){
+		if ( $term eq $_ ){
+			$TERM=ansi;       #Usata in graph come switch
+			$R='[7m';      #reverse
+			$L='[0m';      #low
+			$H='[1m';      #hight
+			$CLS='[H[J';  #clear screen
+			$BEL='';
+			$NCOL=80;          #Numero di colonne
+			return;
+		}
+	}
+	# Uscita x terminale non riconosciuto settaggio dumb
+	$TERM=dumb;       #Usata in graph come switch
+	$R='';      #reverse
+	$L='';     #low
+	$H='';      #hight
+	$CLS=' ' x (2048);  #clear screen
+	$BEL='';
+	$NCOL=80;          #Numero di colonne
+
+} # end init_term()
+#
+# Rest set caratteri grafici
+#
+
+sub reset_term{
+	 print '^[)0' if $term eq 'vt100'; 
+}
+
+sub set_title{
+	local($ltitle) = @_;
+	if ( $ENV{'TERM'} eq 'xterm' ){ print ']0;',$ltitle,''; }
+	print "\n";
+}
