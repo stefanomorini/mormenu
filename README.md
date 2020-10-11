@@ -1,5 +1,5 @@
-Versione 1.3 stable
-===================
+MorMenu Versione 1.3 stable
+===========================
 
 
 Ormai dimenticato e oggi riscoperto lo ripropongo con alcune istruzioni per l'uso e la configurazione del file .mormenu .
